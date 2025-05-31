@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ladro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Ladro Games</h1>
+    </header>
+
+    <main>
+        <div class="games">
+            <div class="card1">
+                <div class="card-content">
+                    <button class="playNowBtn" data-url="games/bingo.html">Play Now</button>
+                </div>
+            </div>
+        
+    
+            <div class="card2">
+                <div class="card-content">
+                    <button class="playNowBtn" data-url="games/catch box.html">Play Now</button>
+                </div>
+            </div>
+        
+            <div class="card3">
+                <div class="card-content">
+                    <button class="playNowBtn" data-url="games/tap battle.html">Play Now</button>
+                </div>
+            </div>
+            <div class="card3">
+                <div class="card-content">
+                    <button class="playNowBtn" data-url="games/odd one out.html">Play Now</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+  <div id="updateModal" class="modal">
+  <div class="modal-content">
+    <h2>🔔 Update Available</h2>
+    <p>A new version of <strong>Ladro Games</strong> is available.</p>
+    
+    <div class="changelog">
+      <h3>What's New:</h3>
+      <ul id="changelogList">
+        <!-- Changelog items from version.json will be inserted here -->
+      </ul>
+    </div>
+
+    <div class="modal-buttons">
+      <button id="updateBtn">🔄 Update Now</button>
+      <button id="laterBtn">Later</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const currentAppVersion = "1.0.1";
+
+// Check for updates
+fetch("https://your-website.com/version.json") // Replace with your actual URL
+    .then(response => response.json())
+    .then(data => {
+        const latestVersion = data.version;
+        const changelog = data.changelog || [];
+
+        if (latestVersion !== currentAppVersion) {
+            const list = document.getElementById("changelogList");
+            changelog.forEach(item => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            document.getElementById("updateModal").style.display = "flex";
+        }
+    })
+    .catch(err => {
+        console.error("Version check failed:", err);
+    });
+
+// Update button click
+document.getElementById("updateBtn").onclick = () => {
+    location.reload(true); // Force reload from server
+};
+
+// Later button click
+document.getElementById("laterBtn").onclick = () => {
+    document.getElementById("updateModal").style.display = "none";
+};
+
+// Handle "Play Now" buttons
+document.querySelectorAll(".playNowBtn").forEach(button => {
+    button.addEventListener("click", function () {
+        const btn = this;
+        btn.style.transform = "scale(0.9)";
+        btn.style.transition = "transform 0.2s ease";
+
+        document.body.classList.add("fade-out");
+
+        const targetUrl = btn.getAttribute("data-url");
+        setTimeout(() => {
+            window.location.href = targetUrl;
+        }, 500); // Match fade-out duration
+    });
+});
+</script>
+
+
+
+
+</body>
+</html>
