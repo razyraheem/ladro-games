@@ -37,7 +37,8 @@ header {
 /* Card */
 .card1,
 .card2,
-.card3 {
+.card3,
+.card4 {
   background-blend-mode: multiply;
   background-position: center;
   background-size: cover;
@@ -58,7 +59,8 @@ header {
 
 .card1:hover,
 .card2:hover,
-.card3:hover {
+.card3:hover,
+.card4:hover {
   transform: scale(1.05);
   box-shadow:
     0 15px 30px rgba(99, 102, 241, 0.3), /* Stronger indigo shadow */
@@ -67,6 +69,18 @@ header {
 
 .card1 {
   background-image: url(games/bingo.png);
+}
+
+.card2 {
+  background-image: url(games/catchbox.JPG);
+}
+
+.card3 {
+  background-image: url(games/tapbattle.JPG);
+}
+
+.card4 {
+  background-image: url(games/oddout.JPEG);
 }
 
 /* Card content */
