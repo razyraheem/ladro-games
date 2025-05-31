@@ -1,116 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Ladro</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Ladro Games</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Modal styling */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .modal.show {
+      display: flex;
+      opacity: 1;
+    }
+    .modal-content {
+      background: white;
+      padding: 1.5rem 2rem;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+    .modal-content p {
+      margin-bottom: 1rem;
+    }
+    .modal-content ul {
+      text-align: left;
+      padding-left: 1.2rem;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+    }
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .modal-buttons button {
+      cursor: pointer;
+      padding: 0.5rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      background-color: #0078d4;
+      color: white;
+      transition: background-color 0.2s ease;
+    }
+    .modal-buttons button:hover {
+      background-color: #005a9e;
+    }
+    .modal-buttons button#laterBtn {
+      background-color: #aaa;
+    }
+    .modal-buttons button#laterBtn:hover {
+      background-color: #888;
+    }
+    /* Fade-out for play button click */
+    .fade-out {
+      animation: fadeOut 0.5s forwards;
+    }
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+      }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Ladro Games</h1>
-    </header>
+  <header>
+    <h1>Ladro Games</h1>
+  </header>
 
-    <main>
-        <div class="games">
-            <div class="card1">
-                <div class="card-content">
-                    <button class="playNowBtn" data-url="games/bingo.html">Play Now</button>
-                </div>
-            </div>
-        
-    
-            <div class="card2">
-                <div class="card-content">
-                    <button class="playNowBtn" data-url="games/catch box.html">Play Now</button>
-                </div>
-            </div>
-        
-            <div class="card3">
-                <div class="card-content">
-                    <button class="playNowBtn" data-url="games/tap battle.html">Play Now</button>
-                </div>
-            </div>
-            <div class="card3">
-                <div class="card-content">
-                    <button class="playNowBtn" data-url="games/odd one out.html">Play Now</button>
-                </div>
-            </div>
+  <main>
+    <div class="games">
+      <div class="card1">
+        <div class="card-content">
+          <button class="playNowBtn" data-url="games/bingo.html">Play Now</button>
         </div>
-    </main>
+      </div>
 
-  <div id="updateModal" class="modal">
-  <div class="modal-content">
-    <h2>🔔 Update Available</h2>
-    <p>A new version of <strong>Ladro Games</strong> is available.</p>
-    
-    <div class="changelog">
-      <h3>What's New:</h3>
-      <ul id="changelogList">
-        <!-- Changelog items from version.json will be inserted here -->
-      </ul>
+      <div class="card2">
+        <div class="card-content">
+          <button class="playNowBtn" data-url="games/catch box.html">Play Now</button>
+        </div>
+      </div>
+
+      <div class="card3">
+        <div class="card-content">
+          <button class="playNowBtn" data-url="games/tap battle.html">Play Now</button>
+        </div>
+      </div>
+
+      <div class="card4">
+        <div class="card-content">
+          <button class="playNowBtn" data-url="games/odd one out.html">Play Now</button>
+        </div>
+      </div>
     </div>
+  </main>
 
-    <div class="modal-buttons">
-      <button id="updateBtn">🔄 Update Now</button>
-      <button id="laterBtn">Later</button>
+  <div id="updateModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="updateTitle">
+    <div class="modal-content">
+      <h2 id="updateTitle">🔔 Update Available</h2>
+      <p>A new version of <strong>Ladro Games</strong> is available.</p>
+
+      <div class="changelog">
+        <h3>What's New:</h3>
+        <ul id="changelogList"></ul>
+      </div>
+
+      <div class="modal-buttons">
+        <button id="updateBtn">🔄 Update Now</button>
+        <button id="laterBtn">Later</button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-const currentAppVersion = "1.0.1";
+  <script>
+    // URL to your version.json on GitHub Pages (replace with your real URL)
+    const VERSION_URL = "https://your-github-username.github.io/your-repo/version.json";
 
-// Check for updates
-fetch("https://your-website.com/version.json") // Replace with your actual URL
-    .then(response => response.json())
-    .then(data => {
-        const latestVersion = data.version;
-        const changelog = data.changelog || [];
+    // Check for updates by comparing saved and remote version
+    async function checkForUpdates() {
+      try {
+        // Fetch with cache-buster to ensure fresh version.json
+        const response = await fetch(VERSION_URL + "?_=" + Date.now());
+        if (!response.ok) throw new Error("Could not fetch version info");
 
-        if (latestVersion !== currentAppVersion) {
-            const list = document.getElementById("changelogList");
-            changelog.forEach(item => {
-                const li = document.createElement("li");
-                li.textContent = item;
-                list.appendChild(li);
-            });
+        const data = await response.json();
 
-            document.getElementById("updateModal").style.display = "flex";
+        // Stored version in localStorage (fallback to "0.0.0" if none)
+        const savedVersion = localStorage.getItem("ladroAppVersion") || "0.0.0";
+
+        // Compare remote version with saved version
+        if (compareVersions(data.version, savedVersion) > 0) {
+          // Show modal with changelog
+          showUpdateModal(data.changelog || []);
+          // Save new version in localStorage so user is not repeatedly notified
+          localStorage.setItem("ladroAppVersion", data.version);
         }
-    })
-    .catch(err => {
-        console.error("Version check failed:", err);
-    });
+      } catch (error) {
+        console.error("Update check failed:", error);
+      }
+    }
 
-// Update button click
-document.getElementById("updateBtn").onclick = () => {
-    location.reload(true); // Force reload from server
-};
+    // Compare semantic version strings like "1.0.3" > "1.0.1"
+    function compareVersions(v1, v2) {
+      const v1parts = v1.split('.').map(Number);
+      const v2parts = v2.split('.').map(Number);
 
-// Later button click
-document.getElementById("laterBtn").onclick = () => {
-    document.getElementById("updateModal").style.display = "none";
-};
+      for(let i = 0; i < Math.max(v1parts.length, v2parts.length); i++) {
+        const a = v1parts[i] || 0;
+        const b = v2parts[i] || 0;
+        if (a > b) return 1;
+        if (a < b) return -1;
+      }
+      return 0; // equal
+    }
 
-// Handle "Play Now" buttons
-document.querySelectorAll(".playNowBtn").forEach(button => {
-    button.addEventListener("click", function () {
-        const btn = this;
-        btn.style.transform = "scale(0.9)";
-        btn.style.transition = "transform 0.2s ease";
+    function showUpdateModal(changelog) {
+      const modal = document.getElementById("updateModal");
+      const changelogList = document.getElementById("changelogList");
+
+      // Clear old changelog items
+      changelogList.innerHTML = "";
+
+      // Insert new changelog items
+      changelog.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        changelogList.appendChild(li);
+      });
+
+      modal.classList.add("show");
+    }
+
+    // Event handlers for modal buttons
+    document.getElementById("updateBtn").onclick = () => {
+      location.reload(true); // Force reload from server
+    };
+
+    document.getElementById("laterBtn").onclick = () => {
+      const modal = document.getElementById("updateModal");
+      modal.classList.remove("show");
+    };
+
+    // Handle "Play Now" button clicks with a fade-out effect
+    document.querySelectorAll(".playNowBtn").forEach(button => {
+      button.addEventListener("click", () => {
+        button.style.transform = "scale(0.9)";
+        button.style.transition = "transform 0.2s ease";
 
         document.body.classList.add("fade-out");
 
-        const targetUrl = btn.getAttribute("data-url");
+        const targetUrl = button.getAttribute("data-url");
         setTimeout(() => {
-            window.location.href = targetUrl;
+          window.location.href = targetUrl;
         }, 500); // Match fade-out duration
+      });
     });
-});
-</script>
 
-
-
-
+    // Check for updates on page load
+    window.addEventListener("load", () => {
+      checkForUpdates();
+      // Optional: re-check every 5 minutes (300000 ms)
+      setInterval(checkForUpdates, 300000);
+    });
+  </script>
 </body>
 </html>
