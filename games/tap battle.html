@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tap Battle - Multiplayer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #1a2238, #2f3a59); /* darker and muted */
+  color: #ddd;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  padding: 20px;
+  text-align: center;
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #c5cbd3;
+  /* Subtle shadow, no neon */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  background: rgba(30, 35, 50, 0.6);
+  border-bottom: 2px solid #5a7d8a; /* muted teal */
+}
+
+#controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(30, 35, 50, 0.5);
+  box-shadow: 0 0 10px rgba(90, 125, 138, 0.3);
+  margin: 10px 20px;
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+button {
+  background: linear-gradient(135deg, #547a8c, #3f5c6a); /* muted blue/gray */
+  border: none;
+  border-radius: 12px;
+  padding: 14px 26px;
+  color: #e1e5ea;
+  font-weight: 600;
+  font-size: 1.15rem;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(50, 70, 85, 0.5);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #425a6d, #2f4452);
+  box-shadow: 0 6px 14px rgba(40, 60, 75, 0.7);
+  transform: scale(1.04);
+}
+
+button:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 6px rgba(40, 60, 75, 0.8);
+}
+
+#timer {
+  text-align: center;
+  font-size: 1.8rem;
+  margin: 5px 20px 20px;
+  font-weight: 600;
+  color: #7fa3b5; /* soft muted blue */
+  text-shadow: 0 0 5px rgba(127, 163, 181, 0.3);
+  letter-spacing: 1.2px;
+  user-select: none;
+}
+
+#timerBarContainer {
+  width: 80%;
+  max-width: 600px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin: 0 auto 25px;
+  box-shadow: inset 0 0 5px rgba(127, 163, 181, 0.3);
+}
+
+#timerBar {
+  height: 100%;
+  background: #7fa3b5; /* same soft blue */
+  border-radius: 10px;
+  width: 100%;
+  transition: width 1s linear;
+  box-shadow: none;
+}
+
+#gameArea {
+  flex-grow: 1;
+  position: relative;
+  width: 100vw;
+  height: 50vw;
+  max-width: 900px;
+  margin: 0 auto 40px;
+  background: radial-gradient(circle at center, #1a2238 0%, #10131c 80%);
+  border-radius: 25px;
+  box-shadow: 0 0 20px rgba(90, 125, 138, 0.4);
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+/* Simplified tap button */
+.tap-btn {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #547a8c, #3f5c6a);
+  color: #e1e5ea;
+  font-weight: 600;
+  text-align: center;
+  line-height: 70px;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(84, 122, 140, 0.6);
+  user-select: none;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.tap-btn:hover {
+  box-shadow: 0 0 14px rgba(65, 90, 109, 0.7);
+  transform: scale(1.05);
+}
+
+.tap-btn:active {
+  transform: scale(0.92);
+  box-shadow: 0 0 10px rgba(65, 90, 109, 0.8);
+}
+
+/* Removed ripple and water drop animations */
+
+/* Responsive */
+@media (max-width: 600px) {
+  button {
+    padding: 12px 18px;
+    font-size: 1rem;
+  }
+
+  .tap-btn {
+    width: 55px;
+    height: 55px;
+    font-size: 16px;
+    line-height: 55px;
+  }
+
+  #timer {
+    font-size: 1.4rem;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <header>💥 Tap Battle - Multiplayer</header>
+
+  <div id="controls">
+    <button id="addPlayerBtn" aria-label="Add Player">➕ Add Player</button>
+    <button id="startGameBtn" aria-label="Start Game">🎮 Start Game</button>
+  </div>
+
+  <div id="timer" aria-live="polite">⏱️ Timer: 10</div>
+  <div id="timerBarContainer" aria-hidden="true">
+    <div id="timerBar"></div>
+  </div>
+
+  <div id="gameArea" aria-label="Game Area" role="main" tabindex="0"></div>
+
+  <script>
+    let playerCount = 0;
+    let scores = [];
+    let gameActive = false;
+    let selectedBtn = null;
+    let timeLeft = 10;
+    let timerInterval = null;
+
+    const gameArea = document.getElementById("gameArea");
+    const timer = document.getElementById("timer");
+    const timerBar = document.getElementById("timerBar");
+
+    document.getElementById("addPlayerBtn").onclick = () => {
+      if (playerCount >= 10) {
+        alert("Maximum 10 players allowed!");
+        return;
+      }
+      playerCount++;
+      scores.push(0);
+      createPlayerButton(playerCount);
+    };
+
+    function createPlayerButton(playerId) {
+      const btn = document.createElement("div");
+      btn.className = "tap-btn";
+      btn.textContent = `P${playerId}`; // show player number before game starts
+      btn.dataset.player = playerId;
+      btn.dataset.score = 0;
+
+      // Random position inside gameArea
+      const x = Math.random() * (gameArea.clientWidth - 80);
+      const y = Math.random() * (gameArea.clientHeight - 80);
+      btn.style.left = `${x}px`;
+      btn.style.top = `${y}px`;
+      gameArea.appendChild(btn);
+
+      // Double-click to select button for repositioning before game starts
+      btn.addEventListener("dblclick", () => {
+        if (gameActive) return;
+        selectedBtn = btn;
+        alert(`Player ${playerId}: Tap anywhere in the game area to move your button.`);
+      });
+
+      // Tap the button to increase score when game active
+      btn.addEventListener("click", (e) => {
+        if (!gameActive || selectedBtn === btn) return;
+        const idx = parseInt(btn.dataset.player) - 1;
+        scores[idx]++;
+        btn.dataset.score = scores[idx];
+        btn.textContent = scores[idx];
+        animateRipple(btn, e);
+      });
+    }
+
+    // Ripple animation effect on tap
+    function animateRipple(button, event) {
+      const ripple = document.createElement("span");
+      ripple.className = "ripple";
+      button.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    }
+
+    // Move selected button on click inside gameArea
+    gameArea.addEventListener("click", (e) => {
+      if (!selectedBtn || gameActive) return;
+
+      // Calculate position relative to gameArea container
+      const rect = gameArea.getBoundingClientRect();
+      let x = e.clientX - rect.left - selectedBtn.offsetWidth / 2;
+      let y = e.clientY - rect.top - selectedBtn.offsetHeight / 2;
+
+      // Clamp position to stay inside gameArea
+      x = Math.min(Math.max(0, x), gameArea.clientWidth - selectedBtn.offsetWidth);
+      y = Math.min(Math.max(0, y), gameArea.clientHeight - selectedBtn.offsetHeight);
+
+      selectedBtn.style.left = x + "px";
+      selectedBtn.style.top = y + "px";
+
+      selectedBtn = null;
+    });
+
+    document.getElementById("startGameBtn").onclick = () => {
+      if (playerCount < 2) {
+        alert("Add at least 2 players to start the game.");
+        return;
+      }
+      if (gameActive) return;
+
+      gameActive = true;
+      timeLeft = 10;
+      timer.textContent = `⏱️ Timer: ${timeLeft}`;
+      timerBar.style.width = "100%";
+
+      // Reset scores and update button labels to 0
+      scores.fill(0);
+      [...gameArea.children].forEach((btn) => {
+        btn.textContent = "0";
+      });
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timer.textContent = `⏱️ Timer: ${timeLeft}`;
+        timerBar.style.width = `${(timeLeft / 10) * 100}%`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          gameActive = false;
+          announceWinner();
+        }
+      }, 1000);
+    };
+
+    function announceWinner() {
+      // Find max score and players with max score
+      const maxScore = Math.max(...scores);
+      const winners = scores
+        .map((score, i) => ({ score, i }))
+        .filter((p) => p.score === maxScore)
+        .map((p) => p.i + 1);
+
+      let message = "";
+      if (maxScore === 0) {
+        message = "No taps recorded! Try again.";
+      } else if (winners.length === 1) {
+        message = `🏆 Player ${winners[0]} wins with ${maxScore} taps!`;
+      } else {
+        message = `🤝 It's a tie between players ${winners.join(", ")} with ${maxScore} taps!`;
+      }
+
+      timer.textContent = message;
+
+      // Show scores on buttons
+      [...gameArea.children].forEach((btn, i) => {
+        btn.textContent = scores[i];
+      });
+    }
+  </script>
+</body>
+</html>

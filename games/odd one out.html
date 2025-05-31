@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🧠 Play with Brain</title>
+  <style>
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+body {
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f9fafb 100%);
+  color: #1f2937;
+  text-align: center;
+  padding: 60px 20px;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.game-container {
+  background: #ffffff;
+  padding: 40px 30px;
+  border-radius: 16px;
+  width: 420px;
+  max-width: 90vw;
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+.game-container:hover {
+  box-shadow: 0 15px 40px rgba(99, 102, 241, 0.3);
+}
+
+.word-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.word {
+  flex: 1 1 100px;
+  max-width: 140px;
+  background-color: #f3f4f6;
+  color: #374151;
+  font-weight: 600;
+  padding: 14px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.25s ease, transform 0.2s ease;
+  user-select: none;
+}
+
+.word:hover {
+  background-color: #6366f1; /* Indigo-500 */
+  color: #ffffff;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+}
+
+.feedback {
+  font-weight: 700;
+  font-size: 18px;
+  margin-top: 26px;
+  color: #2563eb; /* Indigo-600 */
+  min-height: 28px;
+  transition: color 0.3s ease;
+}
+
+#nextBtn {
+  margin-top: 32px;
+  padding: 14px 30px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  transition: background 0.3s ease, transform 0.2s ease;
+  display: none;
+  user-select: none;
+}
+
+#nextBtn:hover {
+  background: linear-gradient(90deg, #4338ca 0%, #4f46e5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(67, 56, 202, 0.5);
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>🧠 Play with Brain</h1>
+    <p>Select the word that doesn't belong:</p>
+    <div id="wordOptions" class="word-options"></div>
+    <p id="feedback" class="feedback"></p>
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <script>
+    const wordSets = [
+  { words: ["Quark", "Photon", "Electron", "Molecule"], oddOne: "Molecule" },
+  { words: ["Algebra", "Geometry", "Calculus", "Philosophy"], oddOne: "Philosophy" },
+  { words: ["Mercury", "Venus", "Pluto", "Halley"], oddOne: "Halley" },
+  { words: ["Polymer", "Monomer", "Isomer", "Catalyst"], oddOne: "Catalyst" },
+  { words: ["Amphibian", "Reptile", "Mammal", "Crustacean"], oddOne: "Crustacean" },
+  { words: ["Symphony", "Sonata", "Opera", "Canvas"], oddOne: "Canvas" },
+  { words: ["Covalent", "Ionic", "Metallic", "Elastic"], oddOne: "Elastic" },
+  { words: ["Entropy", "Enthalpy", "Gibbs", "Force"], oddOne: "Force" },
+  { words: ["Neptune", "Saturn", "Mars", "Alpha Centauri"], oddOne: "Alpha Centauri" },
+  { words: ["Syntax", "Semantics", "Pragmatics", "Topology"], oddOne: "Topology" },
+  { words: ["Galaxy", "Nebula", "Comet", "Atom"], oddOne: "Atom" },
+  { words: ["Mitosis", "Meiosis", "Photosynthesis", "Fission"], oddOne: "Photosynthesis" },
+  { words: ["Isobar", "Isotope", "Isotherm", "Isometric"], oddOne: "Isometric" },
+  { words: ["Photon", "Electron", "Neutrino", "Quasar"], oddOne: "Quasar" },
+  { words: ["Tectonic", "Seismic", "Volcanic", "Meteorological"], oddOne: "Meteorological" },
+  { words: ["Algorithm", "Heuristic", "Syntax", "Cytoplasm"], oddOne: "Cytoplasm" },
+  { words: ["Optics", "Acoustics", "Thermodynamics", "Biology"], oddOne: "Biology" },
+  { words: ["Oxygen", "Nitrogen", "Argon", "Helium"], oddOne: "Helium" },
+  { words: ["Cytoskeleton", "Nucleus", "Mitochondria", "Enzyme"], oddOne: "Enzyme" },
+  { words: ["Photon", "Boson", "Lepton", "Neutron"], oddOne: "Neutron" },
+  { words: ["Eukaryote", "Prokaryote", "Archaea", "Virus"], oddOne: "Virus" },
+  { words: ["Neptune", "Uranus", "Earth", "Jupiter"], oddOne: "Earth" },
+  { words: ["Binary", "Octal", "Hexadecimal", "Decimal"], oddOne: "Decimal" },
+  { words: ["Fermion", "Boson", "Quark", "Molecule"], oddOne: "Molecule" },
+  { words: ["Chordate", "Arthropod", "Mollusk", "Fungus"], oddOne: "Fungus" },
+  { words: ["Symbiosis", "Parasitism", "Mutualism", "Predation"], oddOne: "Predation" },
+  { words: ["Photosynthesis", "Respiration", "Transpiration", "Fertilization"], oddOne: "Fertilization" },
+  { words: ["Capacitor", "Inductor", "Resistor", "Diode"], oddOne: "Diode" },
+  { words: ["Mammal", "Bird", "Reptile", "Fungus"], oddOne: "Fungus" },
+  { words: ["Photon", "Electron", "Muon", "Atom"], oddOne: "Atom" },
+  { words: ["RNA", "DNA", "ATP", "Glucose"], oddOne: "Glucose" },
+  { words: ["Sublimation", "Condensation", "Evaporation", "Photosynthesis"], oddOne: "Photosynthesis" },
+  { words: ["Cation", "Anion", "Isotope", "Electron"], oddOne: "Isotope" },
+  { words: ["Mitochondria", "Chloroplast", "Ribosome", "Lysosome"], oddOne: "Ribosome" },
+  { words: ["Algorithm", "Function", "Loop", "Atom"], oddOne: "Atom" },
+  { words: ["Catalyst", "Enzyme", "Substrate", "Polymer"], oddOne: "Polymer" },
+  { words: ["Newton", "Pascal", "Tesla", "Edison"], oddOne: "Edison" },
+  { words: ["Proton", "Neutron", "Electron", "Photon"], oddOne: "Photon" },
+  { words: ["Carnivore", "Herbivore", "Omnivore", "Saprophyte"], oddOne: "Saprophyte" },
+  { words: ["Oxidation", "Reduction", "Hydrolysis", "Photosynthesis"], oddOne: "Photosynthesis" },
+  { words: ["Quadrilateral", "Triangle", "Pentagon", "Circle"], oddOne: "Circle" },
+  { words: ["Vector", "Scalar", "Matrix", "Polynomial"], oddOne: "Polynomial" },
+  { words: ["Parallel", "Perpendicular", "Tangent", "Convergent"], oddOne: "Convergent" },
+  { words: ["Neptune", "Jupiter", "Earth", "Ceres"], oddOne: "Ceres" },
+  { words: ["Algorithm", "Recursion", "Iteration", "Function"], oddOne: "Function" },
+  { words: ["Proton", "Neutron", "Photon", "Electron"], oddOne: "Photon" },
+  { words: ["DNA", "RNA", "Protein", "Carbohydrate"], oddOne: "Carbohydrate" },
+  { words: ["Wavelength", "Frequency", "Amplitude", "Velocity"], oddOne: "Velocity" },
+  { words: ["Lysosome", "Peroxisome", "Ribosome", "Cytoplasm"], oddOne: "Cytoplasm" },
+  { words: ["Plasma", "Solid", "Liquid", "Gas"], oddOne: "Plasma" },
+  { words: ["Pi", "Euler", "Golden Ratio", "Root"], oddOne: "Root" },
+  { words: ["Boson", "Lepton", "Quark", "Molecule"], oddOne: "Molecule" },
+  { words: ["Polygon", "Ellipse", "Circle", "Sphere"], oddOne: "Sphere" },
+  { words: ["Symmetry", "Asymmetry", "Reflection", "Absorption"], oddOne: "Absorption" },
+  { words: ["Algorithm", "Syntax", "Grammar", "Photosynthesis"], oddOne: "Photosynthesis" },
+  { words: ["Ion", "Atom", "Molecule", "Cell"], oddOne: "Cell" },
+  { words: ["Virus", "Bacteria", "Fungus", "Protozoa"], oddOne: "Virus" },
+  { words: ["Electron", "Proton", "Neutron", "Photon"], oddOne: "Photon" },
+  { words: ["Entropy", "Enthalpy", "Energy", "Force"], oddOne: "Force" },
+  { words: ["Carbon", "Oxygen", "Hydrogen", "Iron"], oddOne: "Iron" },
+  { words: ["Equator", "Prime Meridian", "Tropic of Cancer", "Galaxy"], oddOne: "Galaxy" },
+  { words: ["Pyramid", "Cylinder", "Cube", "Circle"], oddOne: "Circle" },
+  { words: ["Boolean", "Integer", "Float", "Alphabet"], oddOne: "Alphabet" },
+  { words: ["Java", "Python", "Ruby", "HTML"], oddOne: "HTML" },
+  { words: ["Neuron", "Axon", "Dendrite", "Mitochondria"], oddOne: "Mitochondria" },
+  { words: ["Kaleidoscope", "Microscope", "Telescope", "Periscope"], oddOne: "Kaleidoscope" },
+  { words: ["Star", "Planet", "Comet", "Black Hole"], oddOne: "Comet" },
+  { words: ["Phosphorus", "Nitrogen", "Oxygen", "Chlorophyll"], oddOne: "Chlorophyll" },
+  { words: ["DNA", "RNA", "mRNA", "Ribosome"], oddOne: "Ribosome" },
+  { words: ["Isomer", "Isotope", "Isobar", "Isotherm"], oddOne: "Isotherm" },
+  { words: ["Neptune", "Uranus", "Pluto", "Mars"], oddOne: "Pluto" },
+  { words: ["Guitar", "Piano", "Violin", "Brush"], oddOne: "Brush" },
+  { words: ["Wave", "Particle", "Field", "Molecule"], oddOne: "Molecule" },
+  { words: ["Sodium", "Potassium", "Chlorine", "Magnesium"], oddOne: "Chlorine" },
+  { words: ["Biology", "Physics", "Chemistry", "History"], oddOne: "History" },
+  { words: ["Mitochondria", "Chloroplast", "Nucleus", "Ribosome"], oddOne: "Ribosome" },
+  { words: ["Electron", "Proton", "Neutron", "Quark"], oddOne: "Quark" },
+  { words: ["Virus", "Bacteria", "Fungus", "Algae"], oddOne: "Virus" },
+  { words: ["Polygon", "Ellipse", "Circle", "Square"], oddOne: "Ellipse" },
+  { words: ["Binary", "Decimal", "Hexadecimal", "Octagon"], oddOne: "Octagon" },
+];
+
+
+let currentSet = {};
+const wordContainer = document.getElementById("wordOptions");
+const feedback = document.getElementById("feedback");
+const nextBtn = document.getElementById("nextBtn");
+
+function loadNewSet() {
+  feedback.textContent = "";
+  nextBtn.style.display = "none";
+  wordContainer.innerHTML = "";
+
+  currentSet = wordSets[Math.floor(Math.random() * wordSets.length)];
+  shuffleArray(currentSet.words);
+
+  currentSet.words.forEach(word => {
+    const div = document.createElement("div");
+    div.textContent = word;
+    div.className = "word";
+    div.onclick = () => checkAnswer(word);
+    wordContainer.appendChild(div);
+  });
+}
+
+function checkAnswer(selectedWord) {
+  const allWords = document.querySelectorAll(".word");
+  allWords.forEach(w => w.onclick = null); // Disable clicking more
+
+  if (selectedWord === currentSet.oddOne) {
+    feedback.textContent = "✅ Correct!";
+    feedback.style.color = "green";
+  } else {
+    feedback.textContent = `❌ Wrong! The odd one was "${currentSet.oddOne}".`;
+    feedback.style.color = "red";
+  }
+
+  nextBtn.style.display = "inline-block";
+}
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+nextBtn.onclick = loadNewSet;
+
+window.onload = loadNewSet;
+
+  </script>
+</body>
+</html>

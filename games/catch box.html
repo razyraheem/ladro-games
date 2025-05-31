@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Catch the Box Game - Premium Style</title>
+  <style>
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1e2a38, #3a4a5a);
+  color: #ddd;
+  user-select: none;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+header {
+  font-weight: 600;
+  font-size: 36px;
+  letter-spacing: 1.5px;
+  color: #e0e0e0;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  padding: 20px 0;
+}
+
+#score, #timer {
+  font-size: 22px;
+  margin: 15px 0;
+  color: #ccc;
+  font-weight: 500;
+  letter-spacing: 0.7px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+button, #startBtn {
+  margin-top: 25px;
+  padding: 12px 28px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #6c5b7b;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(108,91,123,0.6);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+}
+
+button:hover, #startBtn:hover {
+  background-color: #584a69;
+  box-shadow: 0 6px 14px rgba(88,74,105,0.8);
+}
+
+#box {
+  width: 80px;
+  height: 80px;
+  background-color: #405060;
+  position: absolute;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  display: none;
+}
+
+#box:hover {
+  box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+  transform: scale(1.05);
+  background-color: #55687e;
+  transition: all 0.2s ease;
+}
+
+
+  </style>
+</head>
+<body>
+
+  <h1>🎯 Catch the Box!</h1>
+  <div id="score">Score: 0</div>
+  <div id="timer">Time Left: 30s</div>
+  <button id="startBtn">Start Game</button>
+
+  <div id="box"></div>
+
+  <script>
+    const box = document.getElementById('box');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const startBtn = document.getElementById('startBtn');
+
+    let score = 0;
+    let timeLeft = 30;
+    let gameInterval;
+    let moveInterval;
+    let moveSpeed = 1000; // milliseconds, initial box move interval
+
+    function getRandomPosition() {
+      const maxX = window.innerWidth - 100;
+      const maxY = window.innerHeight - 100;
+      const x = Math.floor(Math.random() * maxX);
+      const y = Math.floor(Math.random() * maxY);
+      return { x, y };
+    }
+
+    function moveBox() {
+      const { x, y } = getRandomPosition();
+      box.style.left = `${x}px`;
+      box.style.top = `${y}px`;
+    }
+
+    function startGame() {
+      score = 0;
+      timeLeft = 30;
+      moveSpeed = 1000;
+      scoreDisplay.textContent = 'Score: 0';
+      timerDisplay.textContent = 'Time Left: 30s';
+      box.style.display = 'block';
+      moveBox();
+
+      if (gameInterval) clearInterval(gameInterval);
+      if (moveInterval) clearInterval(moveInterval);
+
+      // Move box every moveSpeed milliseconds
+      moveInterval = setInterval(moveBox, moveSpeed);
+
+      gameInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = `Time Left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(gameInterval);
+          clearInterval(moveInterval);
+          box.style.display = 'none';
+          alert(`⏰ Time's up! Your final score is: ${score}`);
+        }
+      }, 1000);
+    }
+
+    box.addEventListener('click', () => {
+      score++;
+      scoreDisplay.textContent = `Score: ${score}`;
+
+      // Increase speed: decrease moveSpeed by 20ms each score, minimum 300ms
+      moveSpeed = Math.max(300, 1000 - score * 20);
+
+      clearInterval(moveInterval);
+      moveInterval = setInterval(moveBox, moveSpeed);
+
+      moveBox();
+    });
+
+    startBtn.addEventListener('click', startGame);
+
+    // Prevent text selection on rapid clicks
+    document.body.onselectstart = () => false;
+  </script>
+</body>
+</html>
